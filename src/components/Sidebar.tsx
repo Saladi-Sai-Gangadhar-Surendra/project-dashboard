@@ -1,29 +1,36 @@
+```tsx
 type SidebarProps = {
   projects: string[];
   owners: string[];
   phases: string[];
+  statuses: string[];
 
   selectedProject: string;
   selectedOwner: string;
   selectedPhase: string;
+  selectedStatus: string;
 
   setSelectedProject: (value: string) => void;
   setSelectedOwner: (value: string) => void;
   setSelectedPhase: (value: string) => void;
+  setSelectedStatus: (value: string) => void;
 };
 
 export default function Sidebar({
   projects,
   owners,
   phases,
+  statuses,
 
   selectedProject,
   selectedOwner,
   selectedPhase,
+  selectedStatus,
 
   setSelectedProject,
   setSelectedOwner,
   setSelectedPhase,
+  setSelectedStatus,
 }: SidebarProps) {
   return (
     <div className="w-72 min-h-screen bg-[#07003a] text-white p-8">
@@ -31,7 +38,6 @@ export default function Sidebar({
         Dashboard
       </h1>
 
-      {/* PROJECT */}
       <div className="mb-10">
         <label className="block text-xl mb-3">
           Project
@@ -56,7 +62,6 @@ export default function Sidebar({
         </select>
       </div>
 
-      {/* OWNER */}
       <div className="mb-10">
         <label className="block text-xl mb-3">
           Owner
@@ -81,7 +86,6 @@ export default function Sidebar({
         </select>
       </div>
 
-      {/* WORKSTREAM */}
       <div className="mb-10">
         <label className="block text-xl mb-3">
           Workstream
@@ -105,6 +109,31 @@ export default function Sidebar({
           ))}
         </select>
       </div>
+
+      <div className="mb-10">
+        <label className="block text-xl mb-3">
+          Status
+        </label>
+
+        <select
+          value={selectedStatus}
+          onChange={(e) =>
+            setSelectedStatus(e.target.value)
+          }
+          className="w-full bg-transparent border-b border-white pb-2"
+        >
+          {statuses.map((status) => (
+            <option
+              key={status}
+              value={status}
+              className="text-black"
+            >
+              {status}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }
+```
