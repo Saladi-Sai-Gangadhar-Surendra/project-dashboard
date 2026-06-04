@@ -1,3 +1,4 @@
+```tsx
 "use client";
 
 import { useState } from "react";
@@ -39,15 +40,6 @@ export default function Home() {
 
     setWorkbookData(
       result.sheets
-    );
-
-    console.log(
-      result.sheets
-    );
-
-    console.log(
-      result.sheets
-        .MASTER_TASKS_COMPLETE?.[0]
     );
   }
 
@@ -105,18 +97,91 @@ export default function Home() {
             selectedPhase)
     ) || [];
 
-  const filteredProgress =
-    selectedProject ===
-    "All Projects"
-      ? workbookData
-          ?.PROJECT_PROGRESS_TRACKER ||
-        []
-      : workbookData
-          ?.PROJECT_PROGRESS_TRACKER?.filter(
-            (p: any) =>
-              p.Project ===
-              selectedProject
-          ) || [];
+  const completedCount =
+    filteredTasks.filter(
+      (t: any) => {
+        const status = String(
+          t.Status || ""
+        )
+          .toLowerCase()
+          .trim();
+
+        return (
+          status.includes(
+            "completed"
+          ) ||
+          status.includes(
+            "closed"
+          )
+        );
+      }
+    ).length;
+
+  const inProgressCount =
+    filteredTasks.filter(
+      (t: any) => {
+        const status = String(
+          t.Status || ""
+        )
+          .toLowerCase()
+          .trim();
+
+        return status.includes(
+          "progress"
+        );
+      }
+    ).length;
+
+  const notStartedCount =
+    filteredTasks.filter(
+      (t: any) => {
+        const status = String(
+          t.Status || ""
+        )
+          .toLowerCase()
+          .trim();
+
+        return (
+          status.includes(
+            "not started"
+          ) ||
+          status.includes(
+            "open"
+          ) ||
+          status.includes(
+            "hold"
+          )
+        );
+      }
+    ).length;
+
+  const filteredProgress = [
+    {
+      Project:
+        selectedProject ===
+        "All Projects"
+          ? "Filtered Tasks"
+          : selectedProject,
+
+      "Total Tasks":
+        filteredTasks.length,
+
+      Completed:
+        completedCount,
+
+      "In Progress":
+        inProgressCount,
+
+      "Not Started":
+        notStartedCount,
+
+      "% Complete":
+        filteredTasks.length > 0
+          ? completedCount /
+            filteredTasks.length
+          : 0,
+    },
+  ];
 
   return (
     <div className="flex bg-gray-100 min-h-screen">
@@ -182,49 +247,49 @@ export default function Home() {
               title:
                 "Open Actions",
               value:
-                workbookData
-                  ?.MASTER_ACTIONS_COMPLETE
-                  ?.length || 0,
+                filteredTasks.filter(
+                  (t: any) => {
+                    const status =
+                      String(
+                        t.Status ||
+                          ""
+                      )
+                        .toLowerCase()
+                        .trim();
+
+                    return !(
+                      status.includes(
+                        "completed"
+                      ) ||
+                      status.includes(
+                        "closed"
+                      )
+                    );
+                  }
+                ).length,
             },
 
             {
               title:
                 "Projects",
               value:
-                workbookData
-                  ?.PROJECT_PROGRESS_TRACKER
-                  ?.length || 0,
+                new Set(
+                  filteredTasks.map(
+                    (t: any) =>
+                      t.Project
+                  )
+                ).size,
             },
 
             {
               title:
                 "Completion %",
-              value:
-                selectedProject ===
-                "All Projects"
-                  ? `${Math.round(
-                      (filteredProgress.reduce(
-                        (
-                          sum: number,
-                          p: any
-                        ) =>
-                          sum +
-                          (p[
-                            "% Complete"
-                          ] || 0),
-                        0
-                      ) /
-                        (filteredProgress.length ||
-                          1)) *
-                        100
-                    )}%`
-                  : `${Math.round(
-                      ((filteredProgress[0]
-                        ?.[
-                        "% Complete"
-                      ] || 0) *
-                        100)
-                    )}%`,
+              value: `${Math.round(
+                (completedCount /
+                  (filteredTasks.length ||
+                    1)) *
+                  100
+              )}%`,
             },
           ]}
         />
@@ -249,50 +314,21 @@ export default function Home() {
                 name:
                   "Completed",
                 value:
-                  filteredProgress.reduce(
-                    (
-                      sum: number,
-                      p: any
-                    ) =>
-                      sum +
-                      (p.Completed ||
-                        0),
-                    0
-                  ),
+                  completedCount,
               },
 
               {
                 name:
                   "In Progress",
                 value:
-                  filteredProgress.reduce(
-                    (
-                      sum: number,
-                      p: any
-                    ) =>
-                      sum +
-                      (p[
-                        "In Progress"
-                      ] || 0),
-                    0
-                  ),
+                  inProgressCount,
               },
 
               {
                 name:
                   "Not Started",
                 value:
-                  filteredProgress.reduce(
-                    (
-                      sum: number,
-                      p: any
-                    ) =>
-                      sum +
-                      (p[
-                        "Not Started"
-                      ] || 0),
-                    0
-                  ),
+                  notStartedCount,
               },
             ]}
           />
@@ -319,3 +355,4 @@ export default function Home() {
     </div>
   );
 }
+```
