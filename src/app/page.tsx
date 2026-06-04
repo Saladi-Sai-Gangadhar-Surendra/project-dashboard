@@ -28,6 +28,9 @@ export default function Home() {
   const [selectedPhase, setSelectedPhase] =
     useState("All Workstreams");
 
+  const [selectedStatus, setSelectedStatus] =
+    useState("All Statuses");
+
   async function handleUpload(
     file: File
   ) {
@@ -58,9 +61,7 @@ export default function Home() {
       new Set(
         workbookData?.MASTER_TASKS_COMPLETE?.map(
           (t: any) =>
-            String(
-              t.Owner ?? ""
-            )
+            String(t.Owner ?? "")
         ) || []
       )
     ) as string[]),
@@ -75,6 +76,20 @@ export default function Home() {
             String(
               t.Workstream ?? ""
             )
+        ) || []
+      )
+    ) as string[]),
+  ];
+
+  const statuses: string[] = [
+    "All Statuses",
+    ...(Array.from(
+      new Set(
+        workbookData?.MASTER_ACTIONS_COMPLETE?.map(
+          (a: any) =>
+            String(
+              a.Status ?? ""
+            ).toLowerCase()
         ) || []
       )
     ) as string[]),
@@ -97,46 +112,44 @@ export default function Home() {
             selectedPhase)
     ) || [];
 
-  const completedCount =
-    filteredTasks.filter(
-      (t: any) => {
-        const status = String(
-          t.Status || ""
+  const filteredActions =
+    workbookData?.MASTER_ACTIONS_COMPLETE?.filter(
+      (action: any) =>
+        selectedStatus ===
+          "All Statuses" ||
+        String(
+          action.Status || ""
         )
           .toLowerCase()
-          .trim();
+          .trim() ===
+          selectedStatus
+    ) || [];
 
-        return (
-          status.includes(
-            "completed"
-          ) ||
-          status.includes(
-            "closed"
-          )
-        );
-      }
+  const completedCount =
+    filteredActions.filter(
+      (a: any) =>
+        String(
+          a.Status || ""
+        )
+          .toLowerCase()
+          .includes("closed")
     ).length;
 
   const inProgressCount =
-    filteredTasks.filter(
-      (t: any) => {
-        const status = String(
-          t.Status || ""
+    filteredActions.filter(
+      (a: any) =>
+        String(
+          a.Status || ""
         )
           .toLowerCase()
-          .trim();
-
-        return status.includes(
-          "progress"
-        );
-      }
+          .includes("progress")
     ).length;
 
   const notStartedCount =
-    filteredTasks.filter(
-      (t: any) => {
+    filteredActions.filter(
+      (a: any) => {
         const status = String(
-          t.Status || ""
+          a.Status || ""
         )
           .toLowerCase()
           .trim();
@@ -147,9 +160,6 @@ export default function Home() {
           ) ||
           status.includes(
             "open"
-          ) ||
-          status.includes(
-            "hold"
           )
         );
       }
@@ -160,7 +170,7 @@ export default function Home() {
       Project:
         selectedProject ===
         "All Projects"
-          ? "Filtered Tasks"
+          ? "Filtered View"
           : selectedProject,
 
       "Total Tasks":
@@ -176,9 +186,9 @@ export default function Home() {
         notStartedCount,
 
       "% Complete":
-        filteredTasks.length > 0
+        filteredActions.length > 0
           ? completedCount /
-            filteredTasks.length
+            filteredActions.length
           : 0,
     },
   ];
@@ -189,6 +199,7 @@ export default function Home() {
         projects={projects}
         owners={owners}
         phases={phases}
+        statuses={statuses}
         selectedProject={
           selectedProject
         }
@@ -198,6 +209,9 @@ export default function Home() {
         selectedPhase={
           selectedPhase
         }
+        selectedStatus={
+          selectedStatus
+        }
         setSelectedProject={
           setSelectedProject
         }
@@ -206,6 +220,9 @@ export default function Home() {
         }
         setSelectedPhase={
           setSelectedPhase
+        }
+        setSelectedStatus={
+          setSelectedStatus
         }
       />
 
@@ -247,26 +264,7 @@ export default function Home() {
               title:
                 "Open Actions",
               value:
-                filteredTasks.filter(
-                  (t: any) => {
-                    const status =
-                      String(
-                        t.Status ||
-                          ""
-                      )
-                        .toLowerCase()
-                        .trim();
-
-                    return !(
-                      status.includes(
-                        "completed"
-                      ) ||
-                      status.includes(
-                        "closed"
-                      )
-                    );
-                  }
-                ).length,
+                filteredActions.length,
             },
 
             {
@@ -286,7 +284,7 @@ export default function Home() {
                 "Completion %",
               value: `${Math.round(
                 (completedCount /
-                  (filteredTasks.length ||
+                  (filteredActions.length ||
                     1)) *
                   100
               )}%`,
@@ -312,21 +310,19 @@ export default function Home() {
             data={[
               {
                 name:
-                  "Completed",
+                  "Closed",
                 value:
                   completedCount,
               },
-
               {
                 name:
                   "In Progress",
                 value:
                   inProgressCount,
               },
-
               {
                 name:
-                  "Not Started",
+                  "Open / Not Started",
                 value:
                   notStartedCount,
               },
@@ -340,7 +336,6 @@ export default function Home() {
               (p: any) => ({
                 project:
                   p.Project,
-
                 completion:
                   Math.round(
                     (p[
