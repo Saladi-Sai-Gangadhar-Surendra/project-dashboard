@@ -169,22 +169,6 @@ export default function Home() {
           </div>
         )}
 
-        {workbookData && (
-          <div className="bg-white p-6 rounded-xl shadow mb-6">
-            <h2 className="text-xl font-bold mb-4">
-              Live Workbook Data
-            </h2>
-
-            <pre className="text-xs overflow-auto max-h-64">
-              {JSON.stringify(
-                workbookData.PROJECT_PROGRESS_TRACKER,
-                null,
-                2
-              )}
-            </pre>
-          </div>
-        )}
-
         <KpiCards
           data={[
             {
